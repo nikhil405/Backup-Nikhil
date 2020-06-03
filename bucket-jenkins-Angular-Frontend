@@ -1,0 +1,41 @@
+#!/bin/bash 
+
+set -e
+
+export NODE_VERSION='v8.9.4'
+export NVM_DIR="${WORKSPACE}/.nvm"
+
+#rm -rf "${NVM_DIR}"
+
+if [ ! -d "${NVM_DIR}" ]; then
+   printf 'Installing NVM .'
+   git clone -q https://github.com/creationix/nvm.git "${NVM_DIR}"
+   printf '.'
+   cd "${NVM_DIR}"
+   NVM_LATEST="$(git describe --abbrev=0 --tags --match "v[0-9]*" origin)"
+   git checkout -q "${NVM_LATEST}"
+   \. "${NVM_DIR}/nvm.sh"
+   echo '. DONE'
+else
+   source "${WORKSPACE}/.nvm_profile.sh"
+   echo "NVM is already installed"
+fi
+
+if [ ! -f "${WORKSPACE}/.nvm_profile.sh" ]; then
+   echo 'export NVM_DIR="${WORKSPACE}/.nvm"' | tee "${WORKSPACE}/.nvm_profile.sh" 2>&1 >/dev/null
+   echo '[ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"' | tee -a "${WORKSPACE}/.nvm_profile.sh" 2>&1 >/dev/null
+else
+   source "${WORKSPACE}/.nvm_profile.sh"
+fi
+
+if [ ! -f "${NVM_DIR}/versions/node/${NODE_VERSION}/bin/node" ]; then
+   nvm install "${NODE_VERSION}"
+fi
+
+nvm use "${NODE_VERSION}"
+
+npm install 
+npm install -g bower
+bower install -F
+
+gulp build
