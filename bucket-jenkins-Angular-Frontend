@@ -39,3 +39,17 @@ npm install -g bower
 bower install -F
 
 gulp build
+
+
+
+OR
+
+export 
+export AWS_DEFAULT_REGION='us-west-2'
+BUCKET_NAME='ican19.qwinix.io'
+DISTRIBUTION_ID='EIN5HWD9LB6XC'
+$WORKSPACE/node_modules/bower/bin/bower install
+$WORKSPACE/node_modules/grunt-cli/bin/grunt it --force
+aws s3 sync --delete dist/ s3://${BUCKET_NAME}
+aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+
